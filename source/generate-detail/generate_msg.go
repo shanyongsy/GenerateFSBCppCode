@@ -23,17 +23,32 @@ func GenerateMsgCode(name string) string {
 	// 生成 C++ 的 .h 代码
 	cppCode1 := fmt.Sprintf(`
 #pragma once
-// 文件说明：定义消息 %s // 1
+// 文件说明：定义消息 %s
+
+#include  <cstdint>
+
+class KPlayer
+{
+};
+class KNpc
+{
+};
+class KProtocolProcess
+{
+};
+struct CLIENT_EXTEND_HEADER 
+{
+};
 
 // s2c 系列 -----------------------------------------------------------------------------------------------------------
 // 自动生成的消息 ID
 enum s2c_CLIENT_EXTEND_PROTOCOL
 {
-	%s, // 2
+	%s,
 };
 
 // 自动生成的结构体
-struct %s : CLIENT_EXTEND_HEADER // 3
+struct %s : CLIENT_EXTEND_HEADER
 {
 	uint32_t nID;             // Npc的唯一ID
 
@@ -41,42 +56,42 @@ struct %s : CLIENT_EXTEND_HEADER // 3
 };
 
 // 单发消息
-void KPlayer::send_%s() // 4
+void KPlayer::send_%s()
 {
-	%s sendMsg; // 5
+	%s sendMsg;
 	// todo: 填充 sendMsg 的数据
 
 	// 发送消息
-	sendMsg.SetProtocolHeader(%s, sizeof(%s) - 1); // 6 7
+	sendMsg.SetProtocolHeader(%s, sizeof(%s) - 1);
 	g_pServer->PackDataToClient(m_nNetConnectIdx, &sendMsg, sizeof(sendMsg));
 }
 
 // 群发消息
-void KNpc::broadcast_%s() // 8
+void KNpc::broadcast_%s()
 {
-	%s sync; // 9
-	sync.SetProtocolHeader(%s, sizeof(%s) -1); // 10 11
+	%s sync;
+	sync.SetProtocolHeader(%s, sizeof(%s) -1);
 	sync.nID = m_dwID;
 	// todo: 填充 sync 的数据
 
 	// 广播消息
 	int nMaxCount = MAX_PLAYER;//MAX_BROADCAST_COUNT;
-	BROADCAST_REGION(&sync, sizeof(%s), nMaxCount, m_Index); // 12
+	BROADCAST_REGION(&sync, sizeof(%s), nMaxCount, m_Index);
 }
 
 // 客户端处理
 // 注册 s2c_extend 相关协议处理
 void KProtocolProcess::registerExtendMessageHandler()
 {
-	m_arrExtendFunctions[s2c_CLIENT_EXTEND_PROTOCOL::%s] = &KProtocolProcess::%s; // 13 14
+	m_arrExtendFunctions[s2c_CLIENT_EXTEND_PROTOCOL::%s] = &KProtocolProcess::%s;
 }
 
-bool KProtocolProcess::%s(BYTE* pMsg) // 15
+bool KProtocolProcess::%s(BYTE* pMsg)
 {
     if (pMsg == NULL)
         return false;
 
-    %s* pMsgInfo = (%s*)pMsg; // 16 17
+    %s* pMsgInfo = (%s*)pMsg;
 
 	// 处理方式1
     // int nIdx = NpcSet.SearchID(pMsgInfo->ID);
@@ -116,27 +131,27 @@ bool KProtocolProcess::%s(BYTE* pMsg) // 15
 // 自动生成的消息 ID
 enum c2s_CLIENT_EXTEND_PROTOCOL
 {
-	%s, // 1
+	%s,
 };
 
 // 自动生成的结构体
-struct %s : CLIENT_EXTEND_HEADER // 2
+struct %s : CLIENT_EXTEND_HEADER
 {
 	// TODO: 定义结构体的成员变量
 };
 
 // 客户端发送消息
 {
-	%s sendMsg;  // 3
-	sendMsg.SetProtocolHeader(%s, sizeof(%s) - 1);  // 4 5
+	%s sendMsg;
+	sendMsg.SetProtocolHeader(%s, sizeof(%s) - 1);
 	// todo: 填充 sendMsg 的数据
 	
 	if (g_pClient)
 		g_pClient->SendPackToServer((char*)&sendMsg, sizeof(sendMsg));
 }
 
-// 服务器 %s 消息处理 // 6
-void KPlayer::deal_%s(%s* pMsgInfo) // 7 8
+// 服务器 %s 消息处理
+void KPlayer::deal_%s(%s* pMsgInfo)
 {
 	if (pMsgInfo == NULL)
 	{
@@ -151,7 +166,7 @@ void KProtocolProcess::c2sClientExtendProcess(int nIndex, BYTE * pMsg, int nSize
 {
 	switch ( pHeader->ProtocalType )
 	{
-	case %s: // 9
+	case %s:
 	{
 		if (pMsg == NULL)
 		{
@@ -163,8 +178,8 @@ void KProtocolProcess::c2sClientExtendProcess(int nIndex, BYTE * pMsg, int nSize
 			break;
 		}
 
-		%s* pMsgInfo = (%s*)pMsg; // 10 11
-		Player[nIndex].deal_%s(pMsgInfo); // 12
+		%s* pMsgInfo = (%s*)pMsg;
+		Player[nIndex].deal_%s(pMsgInfo);
 	}
 	break;
 	defualt:
